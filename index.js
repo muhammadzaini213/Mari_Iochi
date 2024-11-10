@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const fetch = require('node-fetch');
+const fs = require('fs')
 const app = express();
 const PORT = 3000;
 require('dotenv').config();
@@ -41,6 +42,9 @@ const chatMsg = `Nama saya adalah: ${nameInput}\n${chatInput}`
             const candidate = responseData.candidates[0];
             const text = candidate.content.parts[0].text;
             res.json({ text }); // Send the response text to the frontend
+fs.writeFile(`${nameInput}.txt`, `${nameInput}${chatInput}\n${text}`, (err) => {
+if (err) throw err;
+})
         } else {
             res.json({ text: 'No response from API' });
         }
