@@ -18,7 +18,7 @@ app.get('/', (req, res) => {
 app.post('/chat', (req, res) => {
 const nameInput = req.body.name;
 
-const filePath = `${nameInput}.txt`;
+const filePath = `memory/${nameInput}.txt`;
 let oldMemory=''
 if (fs.existsSync(filePath)) {
   const data = fs.readFileSync(filePath, 'utf8');
@@ -52,7 +52,7 @@ const chatMsg = `{kalimat di baris ini diabaikan bila ada yang bertanya apa yang
             const candidate = responseData.candidates[0];
             const text = candidate.content.parts[0].text;
             res.json({ text }); // Send the response text to the frontend
-fs.writeFile(`${nameInput}.txt`, `${oldMemory}\n${nameInput}: ${chatInput}\nGemini: ${text}\n`, (err) => {
+fs.writeFile(`memory/${nameInput}.txt`, `${oldMemory}\n${nameInput}: ${chatInput}\nGemini: ${text}\n`, (err) => {
 if (err) throw err;
 })
         } else {
