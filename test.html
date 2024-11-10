@@ -3,30 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Form Pesan</title>
+    <title>Chat Form</title>
 </head>
 <body>
-    <h2>Formulir Pesan</h2>
-    <form id="pesanForm">
-        <label for="nama">Nama:</label>
-        <input type="text" id="nama" name="nama" required><br><br>
-
-        <label for="pesan">Pesan:</label>
-        <textarea id="pesan" name="pesan" required></textarea><br><br>
-
-        <button type="button" onclick="kirimPesan()">Enter</button>
+    <h2>Chat Form</h2>
+    <form id="chatForm" onsubmit="sendChat(event)">
+        <label for="chat">Chat:</label>
+        <textarea id="chat" name="chat" required></textarea><br><br>
+        <button type="submit">Send</button>
     </form>
 
-    <h3>Jawaban:</h3>
-    <p id="jawaban"></p>
+    <h3>Response:</h3>
+    <p id="responseText"></p>
 
     <script>
-        function kirimPesan() {
-            const nama = document.getElementById("nama").value;
-            const pesan = document.getElementById("pesan").value;
-            const jawaban = `Halo, ${nama}. Terima kasih atas pesannya: "${pesan}"`;
+        async function sendChat(event) {
+            event.preventDefault();
 
-            document.getElementById("jawaban").textContent = jawaban;
+            const chatInput = document.getElementById("chat").value;
+
+            // Send the chat input to the /chat route
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ chat: chatInput })
+                });
+
+                const data = await response.json();
+                // Display the response from the API in the 'responseText' element
+                document.getElementById("responseText").textContent = data.text || 'No response available';
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById("responseText").textContent = 'Error sending message.';
+            }
         }
     </script>
 </body>
