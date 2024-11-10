@@ -1,72 +1,55 @@
 const express = require('express');
-const path = require('path')
-const { spawn } = require('child_process');
+const path = require('path');
+const fetch = require('node-fetch');
 const app = express();
 const PORT = 3000;
-require('dotenv').config()
+require('dotenv').config();
 
+// Middleware to parse JSON request bodies
+app.use(express.json());
+
+// Serve the index.html file
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'test.html'));
 });
 
+// Handle the /chat POST request
+app.post('/chat', (req, res) => {
+    const chatInput = req.body.chat;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${process.env.GEMINI_API_KEY}`;
 
-app.get('/sendMsg', (req, res) => {
-    const pythonProcess = spawn('python3', ['script.py']);
+    const data = {
+        contents: [
+            {
+                parts: [
+                    { text: chatInput }
+                ]
+            }
+        ]
+    };
 
-    pythonProcess.stdout.on('data', (data) => {
-        res.send(data.toString());
-    });
-
-    pythonProcess.stderr.on('data', (data) => {
-        res.status(500).send(data.toString());
+    fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(responseData => {
+        if (responseData.candidates && responseData.candidates.length > 0) {
+            const candidate = responseData.candidates[0];
+            const text = candidate.content.parts[0].text;
+            res.json({ text }); // Send the response text to the frontend
+        } else {
+            res.json({ text: 'No response from API' });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        res.status(500).json({ text: 'Error processing the request.' });
     });
 });
 
-
-app.get('/chat', (req, res) => {
-const fetch = require('node-fetch');
-
-const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyChMKb4z3AB5XwbnmsgrcJ7M6vHIbivg7M';
-
-const data = {
-  contents: [
-    {
-      parts: [
-        { text: "Apa yang saya tanyakan sebelumnya?" }
-      ]
-    }
-  ]
-};
-
-fetch(url, {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify(data)
-})
-  .then(response => response.json())
-  .then(responseData => {
-    // Handle the response structure
-    if (responseData.candidates && responseData.candidates.length > 0) {
-      const candidate = responseData.candidates[0];
-      const text = candidate.content.parts[0].text;
-      const finishReason = candidate.finishReason;
-      const safetyRatings = candidate.safetyRatings;
-
-      console.log('Response Text:', text);
-      console.log('Finish Reason:', finishReason);
-      console.log('Safety Ratings:', safetyRatings);
-    } else {
-      console.log('No candidates found in the response');
-    }
-
-    console.log('Usage Metadata:', responseData.usageMetadata);
-    console.log('Model Version:', responseData.modelVersion);
-  })
-  .catch(error => console.error('Error:', error));
-});
-
+// Start the server
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
