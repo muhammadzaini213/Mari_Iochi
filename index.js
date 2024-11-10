@@ -42,7 +42,7 @@ const chatMsg = `Nama saya adalah: ${nameInput}\n${chatInput}`
             const candidate = responseData.candidates[0];
             const text = candidate.content.parts[0].text;
             res.json({ text }); // Send the response text to the frontend
-fs.writeFile(`${nameInput}.txt`, `${nameInput}: ${chat}\nGemini: ${text}\n`, (err) => {
+fs.writeFile(`${nameInput}.txt`, `${nameInput}: ${chatMsg}\nGemini: ${text}\n`, (err) => {
 if (err) throw err;
 })
         } else {
