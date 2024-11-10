@@ -4,42 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat Form</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script> <!-- Include marked.js -->
 </head>
 <body>
     <h2>Chat Form</h2>
     <form id="chatForm" onsubmit="sendChat(event)">
-<label for="name">Name:</label>
+        <label for="name">Name:</label>
         <textarea id="name" name="name" required></textarea><br><br>
+        
         <label for="chat">Chat:</label>
         <textarea id="chat" name="chat" required></textarea><br><br>
+        
         <button type="submit">Send</button>
     </form>
 
     <h3>Response:</h3>
-    <p id="responseText"></p>
+    <div id="responseText"></div> <!-- Use a div instead of p to allow HTML rendering -->
 
     <script>
         async function sendChat(event) {
             event.preventDefault();
 
             const chatInput = document.getElementById("chat").value;
-const nameInput = document.getElementById("name").value;
+            const nameInput = document.getElementById("name").value;
 
-            // Send the chat input to the /chat route
             try {
                 const response = await fetch('/chat', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-name: nameInput,
- chat: chatInput })
+                    body: JSON.stringify({ name: nameInput, chat: chatInput })
                 });
 
                 const data = await response.json();
-                // Display the response from the API in the 'responseText' element
-                document.getElementById("responseText").textContent = data.text || 'No response available';
+                // Parse markdown to HTML
+                const markdownContent = marked(data.text || 'No response available');
+                document.getElementById("responseText").innerHTML = markdownContent;
             } catch (error) {
                 console.error('Error:', error);
                 document.getElementById("responseText").textContent = 'Error sending message.';
