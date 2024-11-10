@@ -15,6 +15,7 @@ app.get('/', (req, res) => {
 
 // Handle the /chat POST request
 app.post('/chat', (req, res) => {
+const nameInput = req.body.name;
     const chatInput = req.body.chat;
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${process.env.GEMINI_API_KEY}`;
 
