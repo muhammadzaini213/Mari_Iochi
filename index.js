@@ -17,6 +17,16 @@ app.get('/', (req, res) => {
 // Handle the /chat POST request
 app.post('/chat', (req, res) => {
 const nameInput = req.body.name;
+
+const filePath = `${nameInput}.txt`;
+let oldMemory=''
+if (fs.existsSync(filePath)) {
+  const data = fs.readFileSync(filePath, 'utf8');
+  oldMemory=data
+} else {
+  console.log('File does not exist. Skipping...');
+}
+
 console.log(nameInput)
     const chatInput = req.body.chat;
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${process.env.GEMINI_API_KEY}`;
@@ -25,7 +35,7 @@ const chatMsg = `Nama saya adalah: ${nameInput}\n${chatInput}`
         contents: [
             {
                 parts: [
-                    { text: chatMsg }
+                    { text: `${oldMemory}\n${chatMsg}` }
                 ]
             }
         ]
@@ -42,7 +52,7 @@ const chatMsg = `Nama saya adalah: ${nameInput}\n${chatInput}`
             const candidate = responseData.candidates[0];
             const text = candidate.content.parts[0].text;
             res.json({ text }); // Send the response text to the frontend
-fs.writeFile(`${nameInput}.txt`, `${nameInput}: ${chatInput}\nGemini: ${text}\n`, (err) => {
+fs.writeFile(`${nameInput}.txt`, `${oldMemory}\n${nameInput}: ${chatInput}\nGemini: ${text}\n`, (err) => {
 if (err) throw err;
 })
         } else {
