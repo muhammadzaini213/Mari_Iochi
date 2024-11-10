@@ -23,6 +23,7 @@
             event.preventDefault();
 
             const chatInput = document.getElementById("chat").value;
+const nameInput = document.getElementById("name").value;
 
             // Send the chat input to the /chat route
             try {
@@ -31,7 +32,9 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ chat: chatInput })
+                    body: JSON.stringify({
+name: nameInput,
+ chat: chatInput })
                 });
 
                 const data = await response.json();
